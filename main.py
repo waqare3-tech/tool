@@ -64,6 +64,7 @@ def get_bin(bin_num):
 # ===================== BOT COMMANDS =====================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+
     conn = sqlite3.connect('redx.db')
     c = conn.cursor()
     c.execute("INSERT OR IGNORE INTO users VALUES (?,?,?,?)",
@@ -80,7 +81,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     await update.message.reply_text(
-        "🔥 E3-HACKER MULTI TOOL BOT 🔥\n\nSelect option below 👇",
+        "🔥 RED-X MULTI TOOL BOT 🔥\n\nSelect option below 👇",
         reply_markup=reply_markup
     )
 
@@ -175,7 +176,7 @@ async def decrypt_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         dec = base64.b64decode(" ".join(context.args)).decode()
         await update.message.reply_text(f"🔓 Decrypted:\n{dec}")
     except:
-        await update.message.reply_text("❌ Invalid code")
+        await update.message.reply_text("❌ Invalid encrypted text")
 
 async def stats_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn = sqlite3.connect('redx.db')
@@ -188,6 +189,43 @@ async def stats_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"📊 Joined:\n{row[0]}")
     else:
         await update.message.reply_text("❌ No stats")
+
+# ===================== MESSAGE HANDLER =====================
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+
+    if text == '🚗 Vehicle Lookup':
+        await update.message.reply_text("Send RC number\nExample: UP26R4007")
+    elif text == '📱 Phone Lookup':
+        await update.message.reply_text("Send phone number\nExample: 923001234567")
+    elif text == '🌍 IP Tracker':
+        await update.message.reply_text("Send IP\nExample: 8.8.8.8")
+    elif text == '💳 BIN Checker':
+        await update.message.reply_text("Send BIN\nExample: 411111")
+    elif text == '🔐 Password Check':
+        await update.message.reply_text("Send password")
+    elif text == '🔒 Encrypt':
+        await update.message.reply_text("Send text to encrypt")
+    elif text == '📊 Stats':
+        await stats_cmd(update, context)
+    elif text == 'ℹ️ Help':
+        await help_cmd(update, context)
+    else:
+        # Auto detect input
+        if re.match(r'^[A-Z]{2}\d{1,2}[A-Z]{1,2}\d{1,4}$', text.upper()):
+            context.args = [text]
+            await vehicle_cmd(update, context)
+        elif re.match(r'^\d{10,12}$', text):
+            context.args = [text]
+            await phone_cmd(update, context)
+        elif re.match(r'^\d{1,3}(\.\d{1,3}){3}$', text):
+            context.args = [text]
+            await ip_cmd(update, context)
+        elif re.match(r'^\d{6}$', text):
+            context.args = [text]
+            await bin_cmd(update, context)
+        else:
+            await update.message.reply_text("Use menu buttons or /help")
 
 # ===================== MAIN =====================
 def main():
@@ -205,6 +243,9 @@ def main():
     app.add_handler(CommandHandler("decrypt", decrypt_cmd))
     app.add_handler(CommandHandler("stats", stats_cmd))
 
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    print("✅ Bot Started...")
     app.run_polling()
 
 if __name__ == '__main__':
