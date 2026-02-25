@@ -8,7 +8,7 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 
 # ===================== TOKEN =====================
-TOKEN = "8482241042:AAEAiSlVTyzS6AOq3Uuh4P5yjr0yzwzhDXU"
+TOKEN = "7787473053:AAFCg166nfOqQY6dJUJfQ3ct5Rfc66dxkrI"
 
 # ===================== API URLs =====================
 VEHICLE_API = "https://anupvehicleinfo07.vercel.app/lookup"
